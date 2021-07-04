@@ -22,7 +22,7 @@ namespace Customer
         private IRoleSprite roleSprite = new RoleSpriteImpl();
 
         //对话信息
-        private DialgueInfo _dialogue;
+        private DialogueInfo _dialogue;
 
         private RoleGameObject()
         {
@@ -30,7 +30,7 @@ namespace Customer
         }
 
         // 创建一个新的 角色Object
-        public static RoleGameObject Create(DialgueInfo dialgueInfo)
+        public static RoleGameObject Create(DialogueInfo dialgueInfo)
         {
             if (pool != null)
             {
@@ -53,7 +53,7 @@ namespace Customer
         }
 
         //设置对话信息
-        public void setDialogue(DialgueInfo dialgueInfo)
+        public void setDialogue(DialogueInfo dialgueInfo)
         {
             this._dialogue = dialgueInfo;
             if (roleDialogue != null)

@@ -6,7 +6,7 @@ using Customer;
 namespace Customer
 {
     // 对话的数据结构
-    public class DialgueInfo
+    public class DialogueInfo
     {
         //Role,IsReturnGoods,TextId,Text,AddRage
         //角色名
@@ -29,7 +29,7 @@ namespace Customer
 
         public Answer NoOptionAnwser { set; get; }
 
-        public DialgueInfo()
+        public DialogueInfo()
         {
 
         }

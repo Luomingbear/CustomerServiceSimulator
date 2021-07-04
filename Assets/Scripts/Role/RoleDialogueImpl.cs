@@ -11,9 +11,9 @@ namespace Customer
         public GameObject GameObject { set; private get; }
 
         // 角色对话信息
-        private DialgueInfo _dialogue = null;
+        private DialogueInfo _dialogue = null;
 
-        public void setDialogue(DialgueInfo dialgueInfo)
+        public void setDialogue(DialogueInfo dialgueInfo)
         {
             this._dialogue = dialgueInfo;
         }

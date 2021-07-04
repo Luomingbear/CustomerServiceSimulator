@@ -9,7 +9,7 @@ namespace Customer
     {
 
         //设置对话信息
-        void setDialogue(DialgueInfo dialgueInfo);
+        void setDialogue(DialogueInfo dialgueInfo);
 
         //下一句话
         // 返回值 true：讲了下一句 ，false：已经说完了

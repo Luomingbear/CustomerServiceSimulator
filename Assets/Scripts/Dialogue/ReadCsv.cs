@@ -30,7 +30,9 @@ namespace Customer
         private Dictionary<string, int> titleDic = new Dictionary<string, int>();
 
         // 对话列表
-        private List<DialgueInfo> dialogueList = new List<DialgueInfo>();
+        private List<DialogueInfo> dialogueList = new List<DialogueInfo>();
+
+        private Dictionary<string, Dictionary<int, DialogueInfo>> roleDialogueDictionary = new Dictionary<string, Dictionary<int, DialogueInfo>>();
 
         //游戏开始的时候就去读取配置信息
         private void Start()
@@ -39,7 +41,7 @@ namespace Customer
         }
 
         //获取解析到到对话信息
-        public List<DialgueInfo> GetDialogueList()
+        public List<DialogueInfo> GetDialogueList()
         {
             return dialogueList;
         }
@@ -113,11 +115,11 @@ namespace Customer
             return -1;
         }
 
-        private DialgueInfo readLine(string line)
+        private DialogueInfo readLine(string line)
         {
             string[] splits = line.Split(',');
 
-            DialgueInfo dialgueInfo = new DialgueInfo();
+            DialogueInfo dialgueInfo = new DialogueInfo();
             // 角色信息
             int index = getTitleIndex(KEY_Role);
             if (index == -1)
@@ -220,12 +222,12 @@ namespace Customer
                     Debug.Log("对话开始解析");
                     while ((line = sr.ReadLine()) != null)
                     {
-                        DialgueInfo dialgueInfo = readLine(line);
+                        DialogueInfo dialgueInfo = readLine(line);
                         if (dialgueInfo == null)
                         {
                             continue;
                         }
-                        dialogueList.Add(dialgueInfo);
+                        putIfAbsent(dialgueInfo);
                         // Debug.Log(line);
                     }
                     Debug.Log("对话解析完毕");
@@ -236,6 +238,20 @@ namespace Customer
                 // 向用户显示出错消息
                 Debug.LogError("The file could not be read:");
                 Debug.LogError(e.Message);
+            }
+        }
+
+        private void putIfAbsent(DialogueInfo dialogue)
+        {
+            if (roleDialogueDictionary.ContainsKey(dialogue.RoleName))
+            {
+                Dictionary<int, DialogueInfo> dialogueDictionary = roleDialogueDictionary[dialogue.RoleName];
+                dialogueDictionary[dialogue.TextId] = dialogue;
+            } else
+            {
+                Dictionary<int, DialogueInfo> dialogueDictionary = new Dictionary<int, DialogueInfo>();
+                dialogueDictionary[dialogue.TextId] = dialogue;
+                roleDialogueDictionary[dialogue.RoleName] = dialogueDictionary;
             }
         }
     }
