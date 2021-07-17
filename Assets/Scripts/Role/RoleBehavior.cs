@@ -14,10 +14,19 @@ namespace Customer
         //相机
         private Camera cam;
         // 是否正在对话
-        private bool isDialoguing = false;
 
-        //是否已经对话完毕
-        private bool isFinish = false;
+        //角色对话实现接口
+        private IRoleDialogue roleDialogue = new RoleDialogueImpl();
+
+        // 设置对话信息
+        public void setDialogueInfos(RoleDialogueInfo roleDialogueInfo)
+        {
+            if (roleDialogue != null)
+            {
+                roleDialogue.init(roleDialogueInfo);
+            }
+        }
+
 
         private void Start()
         {
@@ -27,17 +36,10 @@ namespace Customer
         //说一句话
         private void speakNext()
         {
-            Debug.Log("赶紧说一句话啊！！");
-        }
-
-        private void dialogue()
-        {
-            if (isDialoguing == true) //正在对话中，则不处理
+            if (roleDialogue != null)
             {
-                return;
+                roleDialogue.speakNext();
             }
-            isDialoguing = true;
-            speakNext();
         }
 
         // 向右走，需要判断右边是否有人，要保持一定的距离
@@ -56,14 +58,14 @@ namespace Customer
             }
             else if (viewPoint.x >= 0.5)
             {
-                if (isFinish) //对话结束，走出屏幕
+                if (roleDialogue != null && roleDialogue.isFinish()) //对话结束，走出屏幕
                 {
                     moveRight();
                 }
                 else
                 {
                     //进行对话
-                    dialogue();
+                    speakNext();
                 }
             }
             else // 需要向右走进行排队

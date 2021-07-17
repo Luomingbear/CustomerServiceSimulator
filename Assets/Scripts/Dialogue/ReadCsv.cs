@@ -5,7 +5,7 @@ using System.IO;
 
 namespace Customer
 {
-    public class ReadCsv : MonoBehaviour
+    public class ReadCsv 
     {
         //csv文件的地址
         public string filePath;
@@ -30,9 +30,7 @@ namespace Customer
         private Dictionary<string, int> titleDic = new Dictionary<string, int>();
 
         // 对话列表
-        private List<DialogueInfo> dialogueList = new List<DialogueInfo>();
-
-        private Dictionary<string, Dictionary<int, DialogueInfo>> roleDialogueDictionary = new Dictionary<string, Dictionary<int, DialogueInfo>>();
+        private List<RoleDialogueInfo> dialogueList = new List<RoleDialogueInfo>();
 
         //游戏开始的时候就去读取配置信息
         private void Start()
@@ -41,7 +39,7 @@ namespace Customer
         }
 
         //获取解析到到对话信息
-        public List<DialogueInfo> GetDialogueList()
+        public List<RoleDialogueInfo> GetDialogueList()
         {
             return dialogueList;
         }
@@ -220,6 +218,7 @@ namespace Customer
                     // 从文件读取并显示行，直到文件的末尾 
                     readTitles(sr);
                     Debug.Log("对话开始解析");
+                    RoleDialogueInfo roleDialogueInfo = null;
                     while ((line = sr.ReadLine()) != null)
                     {
                         DialogueInfo dialgueInfo = readLine(line);
@@ -227,7 +226,21 @@ namespace Customer
                         {
                             continue;
                         }
-                        putIfAbsent(dialgueInfo);
+
+                        // 如果roleDialogueInfo=null，或者角色名字有变化，则添加一个新角色
+                        if (roleDialogueInfo == null || roleDialogueInfo.RoleName != dialgueInfo.RoleName)
+                        {
+                            roleDialogueInfo = new RoleDialogueInfo();
+                            roleDialogueInfo.RoleName = dialgueInfo.RoleName;
+                            roleDialogueInfo.AddDialogueInfo(dialgueInfo);
+                            roleDialogueInfo.DialogueId = dialgueInfo.TextId;
+                            dialogueList.Add(roleDialogueInfo);
+                        }
+                        // 否则说明是同一个角色
+                        else
+                        {
+                            roleDialogueInfo.AddDialogueInfo(dialgueInfo);
+                        }
                         // Debug.Log(line);
                     }
                     Debug.Log("对话解析完毕");
@@ -238,20 +251,6 @@ namespace Customer
                 // 向用户显示出错消息
                 Debug.LogError("The file could not be read:");
                 Debug.LogError(e.Message);
-            }
-        }
-
-        private void putIfAbsent(DialogueInfo dialogue)
-        {
-            if (roleDialogueDictionary.ContainsKey(dialogue.RoleName))
-            {
-                Dictionary<int, DialogueInfo> dialogueDictionary = roleDialogueDictionary[dialogue.RoleName];
-                dialogueDictionary[dialogue.TextId] = dialogue;
-            } else
-            {
-                Dictionary<int, DialogueInfo> dialogueDictionary = new Dictionary<int, DialogueInfo>();
-                dialogueDictionary[dialogue.TextId] = dialogue;
-                roleDialogueDictionary[dialogue.RoleName] = dialogueDictionary;
             }
         }
     }
