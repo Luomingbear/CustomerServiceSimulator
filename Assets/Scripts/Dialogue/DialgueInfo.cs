@@ -40,5 +40,10 @@ namespace Customer
             //todo 根据当前项目的地址设置图片文件路径
             return "/Users/bear/Downloads/" + RoleName + ".png";
         }
+
+        public string toString()
+        {
+            return RoleName + "说:[" + Text + "]你有" + Answers.Count + "个选择";
+        }
     }
 }

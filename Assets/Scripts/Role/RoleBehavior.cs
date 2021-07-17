@@ -23,7 +23,7 @@ namespace Customer
         {
             if (roleDialogue != null)
             {
-                roleDialogue.init(roleDialogueInfo);
+                roleDialogue.init(roleDialogueInfo, gameObject);
             }
         }
 
