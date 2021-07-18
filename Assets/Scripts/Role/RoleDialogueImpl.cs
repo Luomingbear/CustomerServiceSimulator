@@ -49,53 +49,39 @@ namespace Customer
             Debug.Log("客户说：" + dialogue.Text);
         }
 
+        //显示选项，
+        // optionObj： 选项的GameObject
+        // position： 这是第几个选项
+        // dialogueInfo: 对话信息
+        private void showOption(GameObject optionObj, int position, DialogueInfo dialogueInfo)
+        {
+            List<Answer> answers = dialogueInfo.Answers;
+            if (answers.Count > position)
+            {
+                OptionClick optionClick = optionObj.GetComponent<OptionClick>();
+                optionClick.Answer = dialogueInfo.Answers[position];
+            }
+            else
+            {
+                GameObject.Destroy(optionObj);
+            }
+
+        }
+
         private void showUserOptionPanel(DialogueInfo dialogueInfo)
         {
+            Debug.Log("显示用户选项");
             Transform canvasTranform = GameObject.Find("Canvas").GetComponent<Transform>();
             GameObject optionPanel = Object.Instantiate(Resources.Load(optionDialogPath), canvasTranform) as GameObject;
             GameObject option1 = GameObject.Find("btn_option1");
             GameObject option2 = GameObject.Find("btn_option2");
             GameObject option3 = GameObject.Find("btn_option3");
             GameObject option4 = GameObject.Find("btn_option4");
-            List<Answer> answers = dialogueInfo.Answers;
 
-            if (answers.Count > 3)
-            {
-                OptionClick optionClick4 = option4.GetComponent<OptionClick>();
-                optionClick4.Answer = dialogueInfo.Answers[3];
-            }
-            else
-            {
-                GameObject.Destroy(option4);
-            }
-            if (answers.Count > 2)
-            {
-                OptionClick optionClick3 = option3.GetComponent<OptionClick>();
-                optionClick3.Answer = dialogueInfo.Answers[2];
-            }
-            else
-            {
-                option3.SetActive(false);
-            }
-            if (answers.Count > 1)
-            {
-                OptionClick optionClick2 = option2.GetComponent<OptionClick>();
-                optionClick2.Answer = dialogueInfo.Answers[1];
-            }
-            else
-            {
-                option2.SetActive(false);
-            }
-            if (answers.Count > 0)
-            {
-                OptionClick optionClick1 = option1.GetComponent<OptionClick>();
-                optionClick1.Answer = dialogueInfo.Answers[0];
-            }
-            else
-            {
-                option1.SetActive(false);
-            }
-            Debug.Log("用户有" + dialogueInfo.Answers.Count + "个选择");
+            showOption(option1, 0, dialogueInfo);
+            showOption(option2, 1, dialogueInfo);
+            showOption(option3, 2, dialogueInfo);
+            showOption(option4, 3, dialogueInfo);
         }
 
         private void dialogue()
