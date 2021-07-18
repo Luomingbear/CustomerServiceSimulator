@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 namespace Customer
 {
@@ -60,6 +61,9 @@ namespace Customer
             {
                 OptionClick optionClick = optionObj.GetComponent<OptionClick>();
                 optionClick.Answer = dialogueInfo.Answers[position];
+                // TMP_Text textMeshPro = optionObj.GetComponentInChildren<TMP_Text>(true) as TMP_Text;
+                Text textComponent = optionObj.GetComponentInChildren<Text>(true) as Text;
+                textComponent.text = optionClick.Answer.Option;
             }
             else
             {
