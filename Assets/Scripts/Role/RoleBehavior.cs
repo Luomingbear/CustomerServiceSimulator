@@ -16,11 +16,18 @@ namespace Customer
         // 是否正在对话
 
         //角色对话实现接口
-        private IRoleDialogue roleDialogue = new RoleDialogueImpl();
+        private IRoleDialogue roleDialogue;
+
+        //正在对话的客户的标签
+        private string TAG_SPEAKING_CUSTOMER = "SpeakCustomer";
 
         // 设置对话信息
         public void setDialogueInfos(RoleDialogueInfo roleDialogueInfo)
         {
+            if (roleDialogue == null)
+            {
+                roleDialogue = GetComponent<IRoleDialogue>();
+            }
             if (roleDialogue != null)
             {
                 roleDialogue.init(roleDialogueInfo, gameObject);
@@ -64,6 +71,8 @@ namespace Customer
                 }
                 else
                 {
+                    //设置自己为对话中的客户
+                    tag = TAG_SPEAKING_CUSTOMER;
                     //进行对话
                     speakNext();
                 }

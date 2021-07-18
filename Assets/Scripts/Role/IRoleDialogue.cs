@@ -15,6 +15,9 @@ namespace Customer
         // 下一句话
         void speakNext();
 
+        //选择了选项
+        void chooseOption(int dialogueId);
+
         //是否说完了
         bool isFinish();
     }

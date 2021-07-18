@@ -6,9 +6,11 @@ using TMPro;
 
 namespace Customer
 {
-    public class RoleDialogueImpl : IRoleDialogue
+    public class RoleDialogueImpl : MonoBehaviour, IRoleDialogue
     {
+        // 客户对话框prefab地址
         private string customerDialogPath = "CustomerDialog";
+        // 角色选项prefab地址
         private string optionDialogPath = "OptionPanel";
         // 对话信息
         private RoleDialogueInfo roleDialogueInfo = null;
@@ -21,18 +23,20 @@ namespace Customer
         private bool isFinished = false;
         //客户gameObject
         private GameObject roleObject;
+
+        //客户说话的panel
+        private GameObject customerDialoguePanel = null;
+        // 用户的选项panel
+        private GameObject optionPanel;
+        private int STATE_IDLE = 0;
+        private int STATE_SHOW = 1;
+        private int STATE_HIDE = 2;
         // 初始化
         public void init(RoleDialogueInfo roleDialogueInfo, GameObject roleObject)
         {
             this.roleDialogueInfo = roleDialogueInfo;
             this.dialogueId = roleDialogueInfo.DialogueId;
             this.roleObject = roleObject;
-        }
-
-        private bool hasNext()
-        {
-            //todo 是否还有下一句话
-            return false;
         }
 
         private void showCustomerPanel(DialogueInfo dialogue)
@@ -43,11 +47,27 @@ namespace Customer
             // Vector2 size = roleObject.GetComponent<SpriteRenderer>().size;
             // Vector3 vector3 = position + new Vector3(size.x, size.y, 0);
             // Debug.Log("vector3:" + vector3);
-            Transform canvasTranform = GameObject.Find("Canvas").GetComponent<Transform>();
-            GameObject obj = Object.Instantiate(Resources.Load(customerDialogPath), canvasTranform) as GameObject;
-            Text text = obj.GetComponentInChildren<Text>(true);
+            if (customerDialoguePanel == null)
+            {
+                Transform canvasTranform = GameObject.Find("Canvas").GetComponent<Transform>();
+                customerDialoguePanel = Object.Instantiate(Resources.Load(customerDialogPath), canvasTranform) as GameObject;
+            }
+            //执行显示动画
+            Animator animator = customerDialoguePanel.GetComponent<Animator>();
+            int state = animator.GetInteger("state");
+            //如果现在对话框没有显示，则直接显示显示新的
+            if (state == STATE_IDLE)
+            {
+                animator.SetInteger("state", STATE_SHOW);
+            }
+            // 如果对话框正在隐藏，则在隐藏之后再显示
+            else if (state == STATE_HIDE)
+            {
+                animator.SetInteger("state", STATE_SHOW);
+            }
+            Text text = customerDialoguePanel.GetComponentInChildren<Text>(true);
             text.text = dialogue.Text;
-            Debug.Log("客户说：" + dialogue.Text);
+            Debug.Log("客户[" + roleDialogueInfo.RoleName + "]说：" + dialogue.Text);
         }
 
         //显示选项，
@@ -56,6 +76,10 @@ namespace Customer
         // dialogueInfo: 对话信息
         private void showOption(GameObject optionObj, int position, DialogueInfo dialogueInfo)
         {
+            if (optionObj == null)
+            {
+                return;
+            }
             List<Answer> answers = dialogueInfo.Answers;
             if (answers.Count > position)
             {
@@ -75,17 +99,56 @@ namespace Customer
         private void showUserOptionPanel(DialogueInfo dialogueInfo)
         {
             Debug.Log("显示用户选项");
-            Transform canvasTranform = GameObject.Find("Canvas").GetComponent<Transform>();
-            GameObject optionPanel = Object.Instantiate(Resources.Load(optionDialogPath), canvasTranform) as GameObject;
+            if (optionPanel == null)
+            {
+                Transform canvasTranform = GameObject.Find("Canvas").GetComponent<Transform>();
+                optionPanel = Object.Instantiate(Resources.Load(optionDialogPath), canvasTranform) as GameObject;
+            }
             GameObject option1 = GameObject.Find("btn_option1");
             GameObject option2 = GameObject.Find("btn_option2");
             GameObject option3 = GameObject.Find("btn_option3");
             GameObject option4 = GameObject.Find("btn_option4");
-
             showOption(option1, 0, dialogueInfo);
             showOption(option2, 1, dialogueInfo);
             showOption(option3, 2, dialogueInfo);
             showOption(option4, 3, dialogueInfo);
+
+            //执行显示动画
+            Animator animator = optionPanel.GetComponent<Animator>();
+            int state = animator.GetInteger("state");
+            //如果现在对话框没有显示，则直接显示显示新的
+            if (state == STATE_IDLE)
+            {
+                animator.SetInteger("state", STATE_SHOW);
+            }
+            // 如果对话框正在隐藏，则在隐藏之后再显示
+            else if (state == STATE_HIDE)
+            {
+                animator.SetInteger("state", STATE_SHOW);
+            }
+        }
+
+        private bool isAnimatingCustomerDialogue()
+        {
+            if (customerDialoguePanel == null)
+            {
+                return false;
+            }
+            Animator animator = customerDialoguePanel.GetComponent<Animator>();
+            AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
+            return stateInfo.normalizedTime >= 0.97f;
+        }
+
+
+        private bool isAnimatingOptionDialogue()
+        {
+            if (optionPanel == null)
+            {
+                return false;
+            }
+            Animator animator = optionPanel.GetComponent<Animator>();
+            AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
+            return stateInfo.normalizedTime >= 0.97f;
         }
 
         private void dialogue()
@@ -95,12 +158,17 @@ namespace Customer
                 DialogueInfo dialogue = roleDialogueInfo.GetDialogueDic()[dialogueId];
                 if (dialogue == null)
                 {
-                    Debug.Log("获取对话信息失败，dialogueId=" + dialogueId);
+                    Debug.Log(roleDialogueInfo.RoleName + "-获取对话信息失败，dialogueId=" + dialogueId);
                     return;
                 }
-                showCustomerPanel(dialogue);
-                showUserOptionPanel(dialogue);
-
+                if (!isAnimatingCustomerDialogue())
+                {
+                    showCustomerPanel(dialogue);
+                }
+                if (!isAnimatingOptionDialogue())
+                {
+                    showUserOptionPanel(dialogue);
+                }
             }
         }
 
@@ -113,6 +181,74 @@ namespace Customer
             }
             isDialoguing = true;
             dialogue();
+        }
+
+        // 隐藏对话和选项
+        //return : 是否已经隐藏
+        private bool hideDialogueAndOption()
+        {
+            if (customerDialoguePanel == null)
+            {
+                return true;
+            }
+
+            bool customerAnimationFinish = false;
+            bool optionAnimationFinish = false;
+            if (customerDialoguePanel != null)
+            {
+                Animator animator = customerDialoguePanel.GetComponent<Animator>();
+                int state = animator.GetInteger("state");
+                if (state == STATE_SHOW)
+                {
+                    animator.SetInteger("state", STATE_HIDE);
+                }
+                else if (state == STATE_HIDE)
+                {
+                    AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
+                    if (stateInfo.normalizedTime >= 0.97f) //说明当前动画快结束了
+                    {
+                        Debug.Log("客户对话框已经隐藏");
+                        optionAnimationFinish = true;
+                    }
+                }
+            }
+
+            if (optionPanel != null)
+            {
+                Animator animator = optionPanel.GetComponent<Animator>();
+                int state = animator.GetInteger("state");
+                if (state == STATE_SHOW)
+                {
+                    animator.SetInteger("state", STATE_HIDE);
+                }
+                else if (state == STATE_HIDE)
+                {
+                    AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
+                    if (stateInfo.normalizedTime >= 0.97f) //说明当前动画快结束了
+                    {
+                        Debug.Log("选项对话框已经隐藏");
+                        optionAnimationFinish = true;
+                        GameObject.Destroy(optionPanel, 1);
+                        optionPanel = null;
+                    }
+                }
+            }
+            return optionAnimationFinish && customerAnimationFinish;
+        }
+
+        // 选择具体的选项
+        public void chooseOption(int dialogueId)
+        {
+            this.dialogueId = dialogueId;
+            this.isDialoguing = false;
+            if (dialogueId == 0)
+            {
+                this.isFinished = true;
+            }
+            if (hideDialogueAndOption() && !isFinished)
+            {
+                speakNext();
+            }
         }
 
         //是否说完了
