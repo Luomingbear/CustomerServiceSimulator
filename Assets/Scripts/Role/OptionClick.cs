@@ -4,21 +4,24 @@ using UnityEngine;
 using Customer;
 
 
-// 处理用户点击选项的行为
-public class OptionClick : MonoBehaviour
+namespace Customer
 {
-    // 回答的内容
-    private Answer Answer { set; get; }
-
-    // 点击进行选择
-    public void chooseOption()
+    // 处理用户点击选项的行为
+    public class OptionClick : MonoBehaviour
     {
-        if (Answer == null)
+        // 回答的内容
+        public Answer Answer { set; get; }
+
+        // 点击进行选择
+        public void chooseOption()
         {
-            return;
+            if (Answer == null)
+            {
+                return;
+            }
+            Debug.Log("用户回答:" + Answer.Option);
+            // todo 
+            // todo 1隐藏对话框 2寻找正在对话的客户角色 3说下一句话
         }
-        Debug.Log("用户回答:" + Answer.Option);
-        // todo 
-        // todo 1隐藏对话框 2寻找正在对话的客户角色 3说下一句话
     }
 }

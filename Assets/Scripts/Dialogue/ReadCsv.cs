@@ -5,7 +5,7 @@ using System.IO;
 
 namespace Customer
 {
-    public class ReadCsv 
+    public class ReadCsv
     {
         //csv文件的地址
         public string filePath;
@@ -75,7 +75,12 @@ namespace Customer
             }
             else
             {
-                answer.Option = splits[index];
+                string option = splits[index];
+                if (option == null || option.Length == 0)
+                {
+                    return null;
+                }
+                answer.Option = option;
             }
             //jump
             index = getTitleIndex(keyJump);
@@ -179,19 +184,19 @@ namespace Customer
             }
             // 回答选项2
             Answer answer2 = getAnswer(splits, KEY_Option2, KEY_Option2Jump, KEY_Option2Mood);
-            if (answer1 != null)
+            if (answer2 != null)
             {
                 answers.Add(answer2);
             }
             // 回答选项3
             Answer answer3 = getAnswer(splits, KEY_Option3, KEY_Option3Jump, KEY_Option3Mood);
-            if (answer1 != null)
+            if (answer3 != null)
             {
                 answers.Add(answer3);
             }
             // 回答选项4
             Answer answer4 = getAnswer(splits, KEY_Option4, KEY_Option4Jump, KEY_Option4Mood);
-            if (answer1 != null)
+            if (answer4 != null)
             {
                 answers.Add(answer4);
             }
